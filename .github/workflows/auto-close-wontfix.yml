@@ -5,17 +5,14 @@ on:
     types: [labeled]
 
 jobs:
-  auto-close-wontfix:
+  auto-close:
     runs-on: ubuntu-latest
-    if: github.event.label.name == 'wontfix'
+    permissions:
+      issues: write
     steps:
-      - name: Close issue
-        uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.issues.update({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'closed'
-            })
+      - name: Close issue if labeled wontfix
+        if: github.event.label.name == 'wontfix'
+        run: |
+          gh issue close ${{ github.event.issue.number }} --reason "not planned"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
